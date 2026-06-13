@@ -102,11 +102,22 @@ namespace CaloriesAndPFC
             double weight = (double)Weight.Value;
             var bzhu = GetBZHU(calories, weight);
 
+            // Расчёт процентов БЖУ от калорийности
+            double proteinPercent = (bzhu.protein * 4 / calories) * 100;
+            double fatsPercent = (bzhu.fats * 9 / calories) * 100;
+            double carbsPercent = (bzhu.carbs * 4 / calories) * 100;
+
             Result.Clear();
+            Result.AppendText("========== РЕЗУЛЬТАТ РАСЧЁТА ==========\n\n");
             Result.AppendText($"Суточная норма калорий: {calories:F0} ккал\n\n");
+            Result.AppendText("========== БЖУ В ГРАММАХ ==========\n\n");
             Result.AppendText($"Белки: {bzhu.protein:F1} г\n");
             Result.AppendText($"Жиры: {bzhu.fats:F1} г\n");
-            Result.AppendText($"Углеводы: {bzhu.carbs:F1} г\n");
+            Result.AppendText($"Углеводы: {bzhu.carbs:F1} г\n\n");
+            Result.AppendText("========== РАСПРЕДЕЛЕНИЕ ПО КАЛОРИЯМ ==========\n\n");
+            Result.AppendText($"Белки: {proteinPercent:F1}%\n");
+            Result.AppendText($"Жиры: {fatsPercent:F1}%\n");
+            Result.AppendText($"Углеводы: {carbsPercent:F1}%\n");
         }
 
         private void SaveTxt_Click(object sender, EventArgs e)
@@ -198,14 +209,20 @@ namespace CaloriesAndPFC
             double fatPercentage = 0.25;
             switch (Goal.SelectedIndex)
             {
-                case 0: fatPercentage = 0.28; break;  
-                case 1: fatPercentage = 0.22; break; 
-                case 2: fatPercentage = 0.25; break; 
+                case 0: fatPercentage = 0.28; break;
+                case 1: fatPercentage = 0.22; break;
+                case 2: fatPercentage = 0.25; break;
             }
             double fatCalories = calories * fatPercentage;
-            double fats = fatCalories / 9; 
+            double fatsFromPercent = fatCalories / 9;
 
-           
+            double minFats = weight * 0.5;
+            double fats = fatsFromPercent;
+            if (fats < minFats) fats = minFats;
+            double maxFats = weight * 1.2;
+            if (fats > maxFats) fats = maxFats;
+
+
             double carbsCalories = calories - proteinCalories - fatCalories;
             double carbs = carbsCalories / 4;  
 
@@ -215,6 +232,11 @@ namespace CaloriesAndPFC
         }
 
         private void Gender_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
         {
 
         }
