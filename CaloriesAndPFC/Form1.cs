@@ -98,6 +98,11 @@ namespace CaloriesAndPFC
 
         private void Calculate_Click(object sender, EventArgs e)
         {
+            if (Height.Value == 0 || Weight.Value == 0 || Age.Value == 0)
+            {
+                MessageBox.Show("Рост, вес и возраст не могут быть равны нулю");
+                return;
+            }
             double calories = GetCalories();
             double weight = (double)Weight.Value;
             var bzhu = GetBZHU(calories, weight);

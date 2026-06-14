@@ -94,6 +94,9 @@
             // 
             // Result
             // 
+            this.Result.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Result.Location = new System.Drawing.Point(20, 290);
             this.Result.Name = "Result";
             this.Result.Size = new System.Drawing.Size(382, 96);
@@ -233,7 +236,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(415, 408);
+            this.ClientSize = new System.Drawing.Size(425, 408);
             this.Controls.Add(this.Goal);
             this.Controls.Add(this.Activity);
             this.Controls.Add(this.Weight);
@@ -252,6 +255,7 @@
             this.Controls.Add(this.SaveDb);
             this.Controls.Add(this.SaveTxt);
             this.Controls.Add(this.Calculate);
+            this.MinimumSize = new System.Drawing.Size(441, 447);
             this.Name = "Form1";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "Form1";
