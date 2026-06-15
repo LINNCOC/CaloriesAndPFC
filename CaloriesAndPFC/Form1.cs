@@ -12,9 +12,11 @@ using System.Windows.Forms;
 
 namespace CaloriesAndPFC
 {
-    public partial class Form1 : Form
+    public partial class Calories : Form
     {
-        public Form1()
+        private bool isDateDescending = true;
+        private bool isCaloriesDescending = true;
+        public Calories()
         {
             InitializeComponent();
             Gender.Items.AddRange(new string[] { "Мужской", "Женский" });
@@ -27,6 +29,7 @@ namespace CaloriesAndPFC
             Goal.SelectedIndex = 0;
 
             CreateDatabase();
+            LoadRecordsToListView();
         }
 
 
@@ -103,6 +106,11 @@ namespace CaloriesAndPFC
                 MessageBox.Show("Рост, вес и возраст не могут быть равны нулю");
                 return;
             }
+            //if (Height.Value > 230 || Weight.Value > 500 ||  Age.Value > 120)
+            //{
+            //    MessageBox.Show("Введены некорректные значения");
+            //    return;
+            //}
             double calories = GetCalories();
             double weight = (double)Weight.Value;
             var bzhu = GetBZHU(calories, weight);
@@ -113,13 +121,13 @@ namespace CaloriesAndPFC
             double carbsPercent = (bzhu.carbs * 4 / calories) * 100;
 
             Result.Clear();
-            Result.AppendText("========== РЕЗУЛЬТАТ РАСЧЁТА ==========\n\n");
+            Result.AppendText("РЕЗУЛЬТАТ РАСЧЁТА\n\n");
             Result.AppendText($"Суточная норма калорий: {calories:F0} ккал\n\n");
-            Result.AppendText("========== БЖУ В ГРАММАХ ==========\n\n");
+            Result.AppendText("БЖУ В ГРАММАХ\n\n");
             Result.AppendText($"Белки: {bzhu.protein:F1} г\n");
             Result.AppendText($"Жиры: {bzhu.fats:F1} г\n");
             Result.AppendText($"Углеводы: {bzhu.carbs:F1} г\n\n");
-            Result.AppendText("========== РАСПРЕДЕЛЕНИЕ ПО КАЛОРИЯМ ==========\n\n");
+            Result.AppendText("РАСПРЕДЕЛЕНИЕ ПО КАЛОРИЯМ\n\n");
             Result.AppendText($"Белки: {proteinPercent:F1}%\n");
             Result.AppendText($"Жиры: {fatsPercent:F1}%\n");
             Result.AppendText($"Углеводы: {carbsPercent:F1}%\n");
@@ -219,23 +227,140 @@ namespace CaloriesAndPFC
                 case 2: fatPercentage = 0.25; break;
             }
             double fatCalories = calories * fatPercentage;
-            double fatsFromPercent = fatCalories / 9;
+            double fats = fatCalories / 9;
 
             double minFats = weight * 0.5;
-            double fats = fatsFromPercent;
-            if (fats < minFats) fats = minFats;
             double maxFats = weight * 1.2;
+            if (fats < minFats) fats = minFats;
             if (fats > maxFats) fats = maxFats;
 
+            double fatCaloriesActual = fats * 9;
 
-            double carbsCalories = calories - proteinCalories - fatCalories;
-            double carbs = carbsCalories / 4;  
+            double carbsCalories = calories - proteinCalories - fatCaloriesActual;
+            double carbs = carbsCalories / 4;
 
             if (carbs < 0) carbs = 0;
 
             return (protein, fats, carbs);
         }
+        private void LoadRecordsToListView()
+        {
+            Records.Items.Clear();
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = "SELECT Id, Date, Calories, Protein, Fats, Carbs FROM History ORDER BY Id DESC";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                        item.SubItems.Add(reader["Date"].ToString());
+                        item.SubItems.Add(Convert.ToDouble(reader["Calories"]).ToString("F0"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Protein"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Fats"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Carbs"]).ToString("F1"));
+                        Records.Items.Add(item);
+                    }
+                }
+            }
+        }
 
+
+
+        private void Add_Click(object sender, EventArgs e)
+        {
+            if (Result.Text == "")
+            {
+                MessageBox.Show("Сначала выполните расчёт (кнопка «Рассчитать»).");
+                return;
+            }
+            SaveDb_Click(sender, e);
+            LoadRecordsToListView();
+        }
+
+        private void Delete_Click(object sender, EventArgs e)
+        {
+            if (Records.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для удаления.");
+                return;
+            }
+
+            int id = Convert.ToInt32(Records.SelectedItems[0].Text);
+            DialogResult result = MessageBox.Show($"Удалить запись #{id}?", "Подтверждение",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+                {
+                    conn.Open();
+                    string sql = "DELETE FROM History WHERE Id = @id";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                        LoadRecordsToListView();
+                    }
+                }
+            }
+        }
+
+        private void SortByDate_Click(object sender, EventArgs e)
+        {
+            isDateDescending = !isDateDescending;
+
+            Records.Items.Clear();
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string order = isDateDescending ? "DESC" : "ASC";
+                string sql = $"SELECT Id, Date, Calories, Protein, Fats, Carbs FROM History ORDER BY Date {order}";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                        item.SubItems.Add(reader["Date"].ToString());
+                        item.SubItems.Add(Convert.ToDouble(reader["Calories"]).ToString("F0"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Protein"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Fats"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Carbs"]).ToString("F1"));
+                        Records.Items.Add(item);
+                    }
+                }
+            }
+        }
+
+        private void SortByCalories_Click(object sender, EventArgs e)
+        {
+            isCaloriesDescending = !isCaloriesDescending;
+
+            Records.Items.Clear();
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string order = isCaloriesDescending ? "DESC" : "ASC";
+                string sql = $"SELECT Id, Date, Calories, Protein, Fats, Carbs FROM History ORDER BY Calories {order}";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                        item.SubItems.Add(reader["Date"].ToString());
+                        item.SubItems.Add(Convert.ToDouble(reader["Calories"]).ToString("F0"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Protein"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Fats"]).ToString("F1"));
+                        item.SubItems.Add(Convert.ToDouble(reader["Carbs"]).ToString("F1"));
+                        Records.Items.Add(item);
+                    }
+                }
+            }
+        }
         private void Gender_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -244,6 +369,55 @@ namespace CaloriesAndPFC
         private void panel2_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void panel4_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void Goal_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel3_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void Records_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Records.SelectedItems.Count == 0)
+                return;
+
+            int id = Convert.ToInt32(Records.SelectedItems[0].Text);
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM History WHERE Id = @id";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Gender.Text = reader["Gender"].ToString();
+
+                            Age.Value = Convert.ToDecimal(reader["Age"]);
+                            Height.Value = Convert.ToDecimal(reader["Height"]);
+                            Weight.Value = Convert.ToDecimal(reader["Weight"]);
+
+                            Activity.Text = reader["Activity"].ToString();
+                            Goal.Text = reader["Goal"].ToString();
+
+                            Calculate_Click(sender, e);
+                        }
+                    }
+                }
+            }
         }
     }
 }
