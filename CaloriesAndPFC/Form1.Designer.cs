@@ -62,6 +62,9 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.Edit = new System.Windows.Forms.Button();
+            this.FilterGoal = new System.Windows.Forms.ComboBox();
+            this.Filter = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Weight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Height)).BeginInit();
@@ -74,42 +77,51 @@
             // 
             // Calculate
             // 
+            this.Calculate.BackColor = System.Drawing.Color.LightGreen;
+            this.Calculate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Calculate.Location = new System.Drawing.Point(7, 9);
             this.Calculate.Name = "Calculate";
             this.Calculate.Size = new System.Drawing.Size(178, 83);
             this.Calculate.TabIndex = 11;
             this.Calculate.Text = "Рассчитать";
-            this.Calculate.UseVisualStyleBackColor = true;
+            this.Calculate.UseVisualStyleBackColor = false;
             this.Calculate.Click += new System.EventHandler(this.Calculate_Click);
             // 
             // SaveTxt
             // 
+            this.SaveTxt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.SaveTxt.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.SaveTxt.Location = new System.Drawing.Point(393, 9);
             this.SaveTxt.Name = "SaveTxt";
             this.SaveTxt.Size = new System.Drawing.Size(178, 83);
             this.SaveTxt.TabIndex = 12;
             this.SaveTxt.Text = "Сохранить в TXT";
-            this.SaveTxt.UseVisualStyleBackColor = true;
+            this.SaveTxt.UseVisualStyleBackColor = false;
             this.SaveTxt.Click += new System.EventHandler(this.SaveTxt_Click);
             // 
             // SaveDb
             // 
+            this.SaveDb.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.SaveDb.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.SaveDb.ForeColor = System.Drawing.Color.Black;
             this.SaveDb.Location = new System.Drawing.Point(198, 9);
             this.SaveDb.Name = "SaveDb";
             this.SaveDb.Size = new System.Drawing.Size(178, 83);
             this.SaveDb.TabIndex = 13;
             this.SaveDb.Text = "Сохранить в БД";
-            this.SaveDb.UseVisualStyleBackColor = true;
+            this.SaveDb.UseVisualStyleBackColor = false;
             this.SaveDb.Click += new System.EventHandler(this.SaveDb_Click);
             // 
             // ShowHistory
             // 
+            this.ShowHistory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.ShowHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.ShowHistory.Location = new System.Drawing.Point(583, 9);
             this.ShowHistory.Name = "ShowHistory";
             this.ShowHistory.Size = new System.Drawing.Size(178, 83);
             this.ShowHistory.TabIndex = 14;
             this.ShowHistory.Text = "Показать историю";
-            this.ShowHistory.UseVisualStyleBackColor = true;
+            this.ShowHistory.UseVisualStyleBackColor = false;
             this.ShowHistory.Click += new System.EventHandler(this.ShowHistory_Click);
             // 
             // Result
@@ -117,13 +129,13 @@
             this.Result.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(204)))), ((int)(((byte)(204)))));
             this.Result.Location = new System.Drawing.Point(7, 400);
             this.Result.Name = "Result";
-            this.Result.Size = new System.Drawing.Size(770, 341);
+            this.Result.Size = new System.Drawing.Size(770, 202);
             this.Result.TabIndex = 15;
             this.Result.Text = "";
+            this.Result.TextChanged += new System.EventHandler(this.Result_TextChanged);
             // 
             // pictureBox1
             // 
-            this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox1.Image = global::CaloriesAndPFC.Properties.Resources.burn;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
@@ -290,9 +302,9 @@
             this.label7.ForeColor = System.Drawing.Color.White;
             this.label7.Location = new System.Drawing.Point(43, 5);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(611, 30);
+            this.label7.Size = new System.Drawing.Size(598, 30);
             this.label7.TabIndex = 18;
-            this.label7.Text = "Расчет калорий и БЖУ — Персональный фитнес-помощник";
+            this.label7.Text = "Расчет калорий и БЖУ - Персональный фитнес-помощник";
             // 
             // label1
             // 
@@ -321,9 +333,9 @@
             this.Records.FullRowSelect = true;
             this.Records.GridLines = true;
             this.Records.HideSelection = false;
-            this.Records.Location = new System.Drawing.Point(192, 261);
+            this.Records.Location = new System.Drawing.Point(285, 261);
             this.Records.Name = "Records";
-            this.Records.Size = new System.Drawing.Size(585, 133);
+            this.Records.Size = new System.Drawing.Size(492, 133);
             this.Records.TabIndex = 19;
             this.Records.UseCompatibleStateImageBehavior = false;
             this.Records.View = System.Windows.Forms.View.Details;
@@ -364,7 +376,7 @@
             this.Add.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(99)))), ((int)(((byte)(156)))));
             this.Add.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Add.ForeColor = System.Drawing.Color.White;
-            this.Add.Location = new System.Drawing.Point(8, 3);
+            this.Add.Location = new System.Drawing.Point(7, 3);
             this.Add.Name = "Add";
             this.Add.Size = new System.Drawing.Size(161, 23);
             this.Add.TabIndex = 20;
@@ -377,7 +389,7 @@
             this.Delete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(218)))), ((int)(((byte)(54)))), ((int)(((byte)(51)))));
             this.Delete.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.Delete.ForeColor = System.Drawing.Color.White;
-            this.Delete.Location = new System.Drawing.Point(8, 32);
+            this.Delete.Location = new System.Drawing.Point(6, 100);
             this.Delete.Name = "Delete";
             this.Delete.Size = new System.Drawing.Size(161, 23);
             this.Delete.TabIndex = 21;
@@ -387,12 +399,13 @@
             // 
             // SortByDate
             // 
-            this.SortByDate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(99)))), ((int)(((byte)(156)))));
+            this.SortByDate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.SortByDate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.SortByDate.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.SortByDate.ForeColor = System.Drawing.Color.White;
-            this.SortByDate.Location = new System.Drawing.Point(7, 61);
+            this.SortByDate.ForeColor = System.Drawing.Color.Black;
+            this.SortByDate.Location = new System.Drawing.Point(7, 29);
             this.SortByDate.Name = "SortByDate";
-            this.SortByDate.Size = new System.Drawing.Size(162, 23);
+            this.SortByDate.Size = new System.Drawing.Size(161, 23);
             this.SortByDate.TabIndex = 22;
             this.SortByDate.Text = "Сортировать по дате";
             this.SortByDate.UseVisualStyleBackColor = false;
@@ -400,10 +413,11 @@
             // 
             // SortByCalories
             // 
-            this.SortByCalories.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(14)))), ((int)(((byte)(99)))), ((int)(((byte)(156)))));
+            this.SortByCalories.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.SortByCalories.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.SortByCalories.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.SortByCalories.ForeColor = System.Drawing.Color.White;
-            this.SortByCalories.Location = new System.Drawing.Point(7, 90);
+            this.SortByCalories.ForeColor = System.Drawing.Color.Black;
+            this.SortByCalories.Location = new System.Drawing.Point(6, 56);
             this.SortByCalories.Name = "SortByCalories";
             this.SortByCalories.Size = new System.Drawing.Size(162, 40);
             this.SortByCalories.TabIndex = 23;
@@ -424,7 +438,9 @@
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(37)))), ((int)(((byte)(38)))));
+            this.panel2.Controls.Add(this.Filter);
             this.panel2.Controls.Add(this.label1);
+            this.panel2.Controls.Add(this.FilterGoal);
             this.panel2.Controls.Add(this.label2);
             this.panel2.Controls.Add(this.label3);
             this.panel2.Controls.Add(this.Gender);
@@ -459,21 +475,60 @@
             // 
             this.panel4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(37)))), ((int)(((byte)(38)))));
             this.panel4.Controls.Add(this.SortByDate);
+            this.panel4.Controls.Add(this.Edit);
             this.panel4.Controls.Add(this.Add);
             this.panel4.Controls.Add(this.Delete);
             this.panel4.Controls.Add(this.SortByCalories);
             this.panel4.Location = new System.Drawing.Point(7, 261);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(179, 133);
+            this.panel4.Size = new System.Drawing.Size(272, 133);
             this.panel4.TabIndex = 27;
             this.panel4.Paint += new System.Windows.Forms.PaintEventHandler(this.panel4_Paint);
+            // 
+            // Edit
+            // 
+            this.Edit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.Edit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Edit.Font = new System.Drawing.Font("Consolas", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Edit.Location = new System.Drawing.Point(175, 3);
+            this.Edit.Name = "Edit";
+            this.Edit.Size = new System.Drawing.Size(94, 127);
+            this.Edit.TabIndex = 15;
+            this.Edit.Text = "Изменить";
+            this.Edit.UseVisualStyleBackColor = false;
+            this.Edit.Click += new System.EventHandler(this.Edit_Click);
+            // 
+            // FilterGoal
+            // 
+            this.FilterGoal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.FilterGoal.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FilterGoal.ForeColor = System.Drawing.Color.White;
+            this.FilterGoal.FormattingEnabled = true;
+            this.FilterGoal.Location = new System.Drawing.Point(466, 70);
+            this.FilterGoal.Name = "FilterGoal";
+            this.FilterGoal.Size = new System.Drawing.Size(121, 23);
+            this.FilterGoal.TabIndex = 16;
+            this.FilterGoal.Text = "Выбор фильтра";
+            // 
+            // Filter
+            // 
+            this.Filter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.Filter.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Filter.ForeColor = System.Drawing.Color.White;
+            this.Filter.Location = new System.Drawing.Point(593, 69);
+            this.Filter.Name = "Filter";
+            this.Filter.Size = new System.Drawing.Size(95, 24);
+            this.Filter.TabIndex = 28;
+            this.Filter.Text = "Фильтровать";
+            this.Filter.UseVisualStyleBackColor = false;
+            this.Filter.Click += new System.EventHandler(this.Filter_Click);
             // 
             // Calories
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(784, 754);
+            this.ClientSize = new System.Drawing.Size(784, 606);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
@@ -535,6 +590,9 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.Button Edit;
+        private System.Windows.Forms.ComboBox FilterGoal;
+        private System.Windows.Forms.Button Filter;
     }
 }
 

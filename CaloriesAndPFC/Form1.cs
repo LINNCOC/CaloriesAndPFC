@@ -16,6 +16,7 @@ namespace CaloriesAndPFC
     {
         private bool isDateDescending = true;
         private bool isCaloriesDescending = true;
+        private int editingId = -1;
         public Calories()
         {
             InitializeComponent();
@@ -27,6 +28,8 @@ namespace CaloriesAndPFC
 
             Goal.Items.AddRange(new string[] { "Набор массы", "Похудение", "Поддержание" });
             Goal.SelectedIndex = 0;
+            FilterGoal.Items.AddRange(new string[] { "Все цели", "Набор массы", "Похудение", "Поддержание" });
+            FilterGoal.SelectedIndex = 0;
 
             CreateDatabase();
             LoadRecordsToListView();
@@ -106,11 +109,6 @@ namespace CaloriesAndPFC
                 MessageBox.Show("Рост, вес и возраст не могут быть равны нулю");
                 return;
             }
-            //if (Height.Value > 230 || Weight.Value > 500 ||  Age.Value > 120)
-            //{
-            //    MessageBox.Show("Введены некорректные значения");
-            //    return;
-            //}
             double calories = GetCalories();
             double weight = (double)Weight.Value;
             var bzhu = GetBZHU(calories, weight);
@@ -131,6 +129,34 @@ namespace CaloriesAndPFC
             Result.AppendText($"Белки: {proteinPercent:F1}%\n");
             Result.AppendText($"Жиры: {fatsPercent:F1}%\n");
             Result.AppendText($"Углеводы: {carbsPercent:F1}%\n");
+
+            Result.AppendText("\nРЕКОМЕНДАЦИЯ\n\n");
+
+            weight = (double)Weight.Value;
+            string goalName = Goal.Text;
+
+            if (goalName == "Набор массы")
+            {
+                Result.AppendText($"Для набора массы рекомендуется увеличить калорийность на 300-500 ккал.\n");
+                Result.AppendText($"Потребление белка должно составлять около 2 г/кг веса ({weight * 2:F0} г/сутки).\n");
+                Result.AppendText("Включите в рацион: гречку, рис, овсянку, куриную грудку, яйца, творог.\n");
+                Result.AppendText("Принимайте пищу 4-5 раз в день через равные промежутки времени.\n");
+            }
+            else if (goalName == "Похудение")
+            {
+                Result.AppendText($"Для снижения веса рекомендуется создать умеренный дефицит калорий (300-500 ккал).\n");
+                Result.AppendText($"Потребление белка должно составлять около 1.6 г/кг веса ({weight * 1.6:F0} г/сутки).\n");
+                Result.AppendText("Исключите: сахар, фастфуд, сладкие напитки, белый хлеб.\n");
+                Result.AppendText("Увеличьте долю овощей, зелени и нежирного белка в рационе.\n");
+            }
+            else if (goalName == "Поддержание")
+            {
+                Result.AppendText($"Для поддержания текущей формы соблюдайте баланс калорий (поддерживающая калорийность).\n");
+                Result.AppendText($"Потребление белка около 1.8 г/кг веса ({weight * 1.8:F0} г/сутки).\n");
+                Result.AppendText("Разнообразьте рацион: рыба, крупы, овощи, фрукты, полезные жиры (орехи, авокадо).\n");
+                Result.AppendText("Контролируйте размер порций и не пропускайте приёмы пищи.\n");
+            }
+            Result.AppendText("\n*Рекомендации носят общий характер и не заменяют консультацию специалиста.");
         }
 
         private void SaveTxt_Click(object sender, EventArgs e)
@@ -145,7 +171,9 @@ namespace CaloriesAndPFC
             double weight = (double)Weight.Value;
             var bzhu = GetBZHU(calories, weight);
 
-            string line = $"{DateTime.Now:dd.MM.yyyy HH:mm:ss} | {Gender.Text} | {Age.Value} лет | {Height.Value} см | {Weight.Value} кг | {Activity.Text} | {Goal.Text} | {calories:F0} ккал | {bzhu.protein:F1}г б | {bzhu.fats:F1}г ж | {bzhu.carbs:F1}г у";
+            string line = $"{DateTime.Now:dd.MM.yyyy HH:mm:ss} | {Gender.Text} | {Age.Value} лет | {Height.Value} см " +
+                $"| {Weight.Value} кг | {Activity.Text} | {Goal.Text} | " +
+                $"{calories:F0} ккал | {bzhu.protein:F1}г б | {bzhu.fats:F1}г ж | {bzhu.carbs:F1}г у";
             File.AppendAllText("CalculationHistory.txt", line + Environment.NewLine);
             MessageBox.Show("Сохранено в CalculationHistory.txt");
         }
@@ -165,7 +193,8 @@ namespace CaloriesAndPFC
             using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
             {
                 conn.Open();
-                string sql = "INSERT INTO History (Date, Gender, Age, Height, Weight, Activity, Goal, Calories, Protein, Fats, Carbs) VALUES (@date, @gender, @age, @height, @weight, @activity, @goal, @cal, @prot, @fat, @carb)";
+                string sql = "INSERT INTO History (Date, Gender, Age, Height, Weight, Activity, Goal, Calories, Protein, Fats, Carbs)" +
+                    " VALUES (@date, @gender, @age, @height, @weight, @activity, @goal, @cal, @prot, @fat, @carb)";
                 using (var cmd = new SQLiteCommand(sql, conn))
                 {
                     cmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
@@ -266,9 +295,6 @@ namespace CaloriesAndPFC
                 }
             }
         }
-
-
-
         private void Add_Click(object sender, EventArgs e)
         {
             if (Result.Text == "")
@@ -276,8 +302,63 @@ namespace CaloriesAndPFC
                 MessageBox.Show("Сначала выполните расчёт (кнопка «Рассчитать»).");
                 return;
             }
-            SaveDb_Click(sender, e);
+
+            double calories = GetCalories();
+            double weight = (double)Weight.Value;
+            var bzhu = GetBZHU(calories, weight);
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+
+                string sql;
+                if (editingId == -1) 
+                {
+                    sql = @"INSERT INTO History (Date, Gender, Age, Height, Weight, Activity, Goal, Calories, Protein, Fats, Carbs) 
+                    VALUES (@date, @gender, @age, @height, @weight, @activity, @goal, @cal, @prot, @fat, @carb)";
+                }
+                else 
+                {
+                    sql = @"UPDATE History SET 
+                    Date = @date,
+                    Gender = @gender,
+                    Age = @age,
+                    Height = @height,
+                    Weight = @weight,
+                    Activity = @activity,
+                    Goal = @goal,
+                    Calories = @cal,
+                    Protein = @prot,
+                    Fats = @fat,
+                    Carbs = @carb
+                    WHERE Id = @id";
+                }
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss"));
+                    cmd.Parameters.AddWithValue("@gender", Gender.Text);
+                    cmd.Parameters.AddWithValue("@age", (int)Age.Value);
+                    cmd.Parameters.AddWithValue("@height", (double)Height.Value);
+                    cmd.Parameters.AddWithValue("@weight", weight);
+                    cmd.Parameters.AddWithValue("@activity", Activity.Text);
+                    cmd.Parameters.AddWithValue("@goal", Goal.Text);
+                    cmd.Parameters.AddWithValue("@cal", calories);
+                    cmd.Parameters.AddWithValue("@prot", bzhu.protein);
+                    cmd.Parameters.AddWithValue("@fat", bzhu.fats);
+                    cmd.Parameters.AddWithValue("@carb", bzhu.carbs);
+
+                    if (editingId != -1)
+                        cmd.Parameters.AddWithValue("@id", editingId);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            string action = editingId == -1 ? "добавлена" : "обновлена";
+            editingId = -1; 
             LoadRecordsToListView();
+            MessageBox.Show($"Запись успешно {action}.");
         }
 
         private void Delete_Click(object sender, EventArgs e)
@@ -361,6 +442,99 @@ namespace CaloriesAndPFC
                 }
             }
         }
+
+        private void Records_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Records.SelectedItems.Count == 0)
+            {
+                editingId = -1;
+                return;
+            }
+
+            int id = Convert.ToInt32(Records.SelectedItems[0].Text);
+            editingId = id;  
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = "SELECT * FROM History WHERE Id = @id";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            Gender.Text = reader["Gender"].ToString();
+                            Age.Value = Convert.ToDecimal(reader["Age"]);
+                            Height.Value = Convert.ToDecimal(reader["Height"]);
+                            Weight.Value = Convert.ToDecimal(reader["Weight"]);
+                            Activity.Text = reader["Activity"].ToString();
+                            Goal.Text = reader["Goal"].ToString();
+                            Calculate_Click(sender, e);
+                        }
+                    }
+                }
+            }
+        }
+        private void Filter_Click(object sender, EventArgs e)
+        {
+            {
+                string filter = FilterGoal.Text;
+
+                Records.Items.Clear();
+                using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+                {
+                    conn.Open();
+                    string sql;
+                    if (filter == "Все цели")
+                        sql = "SELECT Id, Date, Calories, Protein, Fats, Carbs FROM History ORDER BY Id DESC";
+                    else
+                        sql = "SELECT Id, Date, Calories, Protein, Fats, Carbs FROM History WHERE Goal = @goal ORDER BY Id DESC";
+
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        if (filter != "Все цели")
+                            cmd.Parameters.AddWithValue("@goal", filter);
+
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                                item.SubItems.Add(reader["Date"].ToString());
+                                item.SubItems.Add(Convert.ToDouble(reader["Calories"]).ToString("F0"));
+                                item.SubItems.Add(Convert.ToDouble(reader["Protein"]).ToString("F1"));
+                                item.SubItems.Add(Convert.ToDouble(reader["Fats"]).ToString("F1"));
+                                item.SubItems.Add(Convert.ToDouble(reader["Carbs"]).ToString("F1"));
+                                Records.Items.Add(item);
+                            }
+                        }
+                    }
+                }
+
+                if (Records.Items.Count == 0)
+                    MessageBox.Show("Записей с выбранной целью не найдено.");
+            }
+        }
+        private void Edit_Click(object sender, EventArgs e)
+        {
+            if (Records.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Сначала выберите запись для редактирования.");
+                return;
+            }
+
+            Records_SelectedIndexChanged(sender, e);
+
+            MessageBox.Show("Теперь вы можете изменить параметры в полях ввода. После изменений нажмите «Добавить запись» для сохранения.");
+        }
+
+        private void Result_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void Gender_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -386,38 +560,5 @@ namespace CaloriesAndPFC
 
         }
 
-        private void Records_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (Records.SelectedItems.Count == 0)
-                return;
-
-            int id = Convert.ToInt32(Records.SelectedItems[0].Text);
-
-            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
-            {
-                conn.Open();
-                string sql = "SELECT * FROM History WHERE Id = @id";
-                using (var cmd = new SQLiteCommand(sql, conn))
-                {
-                    cmd.Parameters.AddWithValue("@id", id);
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            Gender.Text = reader["Gender"].ToString();
-
-                            Age.Value = Convert.ToDecimal(reader["Age"]);
-                            Height.Value = Convert.ToDecimal(reader["Height"]);
-                            Weight.Value = Convert.ToDecimal(reader["Weight"]);
-
-                            Activity.Text = reader["Activity"].ToString();
-                            Goal.Text = reader["Goal"].ToString();
-
-                            Calculate_Click(sender, e);
-                        }
-                    }
-                }
-            }
-        }
     }
 }
