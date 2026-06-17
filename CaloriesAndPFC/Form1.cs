@@ -17,6 +17,8 @@ namespace CaloriesAndPFC
         private bool isDateDescending = true;
         private bool isCaloriesDescending = true;
         private int editingId = -1;
+        private int editingDiaryId = -1;
+        private double savedNorm = 0;
         public Calories()
         {
             InitializeComponent();
@@ -30,9 +32,17 @@ namespace CaloriesAndPFC
             Goal.SelectedIndex = 0;
             FilterGoal.Items.AddRange(new string[] { "Все цели", "Набор массы", "Похудение", "Поддержание" });
             FilterGoal.SelectedIndex = 0;
+            MealTypeSelect.Items.AddRange(new string[] { "Завтрак", "Обед", "Ужин", "Перекус" });
+            MealTypeSelect.SelectedIndex = 0;   
 
             CreateDatabase();
+            LoadDefaultFoods();
+            LoadFoodsToComboBox();
             LoadRecordsToListView();
+            LoadDiary();
+            UpdateProgress();
+            this.btnAddToDiary.Click += new EventHandler(this.AddToDiary_Click);
+            this.btnRemoveFromDiary.Click += new EventHandler(this.RemoveFromDiary_Click);
         }
 
 
@@ -47,7 +57,7 @@ namespace CaloriesAndPFC
                 using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
                 {
                     conn.Open();
-                    string sql = @"CREATE TABLE IF NOT EXISTS History (
+                    string sqlHistory = @"CREATE TABLE IF NOT EXISTS History (
                 Id INTEGER PRIMARY KEY AUTOINCREMENT,
                 Date TEXT,
                 Gender TEXT,
@@ -60,13 +70,310 @@ namespace CaloriesAndPFC
                 Protein REAL,
                 Fats REAL,
                 Carbs REAL)";
-                    using (var cmd = new SQLiteCommand(sql, conn))
+
+                    string sqlFoods = @"CREATE TABLE IF NOT EXISTS Foods (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                Calories REAL NOT NULL,
+                Protein REAL NOT NULL,
+                Fats REAL NOT NULL,
+                Carbs REAL NOT NULL)";
+
+                    string sqlDiary = @"CREATE TABLE IF NOT EXISTS Diary (
+                Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                Date TEXT NOT NULL,
+                FoodId INTEGER NOT NULL,
+                Weight REAL NOT NULL,
+                MealType TEXT NOT NULL,
+                FOREIGN KEY(FoodId) REFERENCES Foods(Id))";
+
+                    using (var cmd = new SQLiteCommand(sqlHistory, conn))
+                        cmd.ExecuteNonQuery();
+                    using (var cmd = new SQLiteCommand(sqlFoods, conn))
+                        cmd.ExecuteNonQuery();
+                    using (var cmd = new SQLiteCommand(sqlDiary, conn))
                         cmd.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Ошибка БД: " + ex.Message);
+            }
+        }
+        private void LoadDefaultFoods()
+        {
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+
+                string checkSql = "SELECT COUNT(*) FROM Foods";
+                using (var checkCmd = new SQLiteCommand(checkSql, conn))
+                {
+                    int count = Convert.ToInt32(checkCmd.ExecuteScalar());
+                    if (count > 0) return;
+                }
+
+                var foods = new List<(string Name, double Calories, double Protein, double Fats, double Carbs)>()
+        {
+            ("Куриная грудка", 165, 31, 3.6, 0),
+            ("Гречка", 343, 12.6, 3.3, 71.5),
+            ("Рис", 344, 6.7, 0.7, 78.9),
+            ("Овсянка", 366, 11.9, 7.2, 69.3),
+            ("Яйцо куриное", 155, 12.7, 11.5, 0.7),
+            ("Творог 5%", 121, 17, 5, 1.8),
+            ("Кефир 1%", 40, 3, 1, 4),
+            ("Молоко 2.5%", 52, 2.8, 2.5, 4.7),
+            ("Хлеб ржаной", 201, 6.6, 1.2, 43.4),
+            ("Макароны", 350, 12, 1.5, 72),
+            ("Говядина", 250, 26, 16, 0),
+            ("Рыба (минтай)", 72, 15.9, 0.9, 0),
+            ("Яблоко", 52, 0.3, 0.2, 13.8),
+            ("Банан", 89, 1.1, 0.3, 22.8),
+            ("Авокадо", 160, 2, 14.7, 8.5),
+            ("Орехи грецкие", 654, 15.2, 65.2, 13.7),
+            ("Масло оливковое", 884, 0, 100, 0),
+        };
+
+                string insertSql = "INSERT INTO Foods (Name, Calories, Protein, Fats, Carbs) VALUES (@name, @cal, @prot, @fat, @carb)";
+                foreach (var food in foods)
+                {
+                    using (var cmd = new SQLiteCommand(insertSql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@name", food.Name);
+                        cmd.Parameters.AddWithValue("@cal", food.Calories);
+                        cmd.Parameters.AddWithValue("@prot", food.Protein);
+                        cmd.Parameters.AddWithValue("@fat", food.Fats);
+                        cmd.Parameters.AddWithValue("@carb", food.Carbs);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
+        private void LoadFoodsToComboBox()
+        {
+            FoodSelect.Items.Clear();
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = "SELECT Id, Name FROM Foods ORDER BY Name";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        FoodSelect.Items.Add(reader["Name"].ToString());
+                    }
+                }
+            }
+            if (FoodSelect.Items.Count > 0)
+                FoodSelect.SelectedIndex = 0;
+        }
+        private void LoadDiary()
+        {
+            DiaryList.Items.Clear();
+            string today = DateTime.Now.ToString("dd.MM.yyyy");
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = @"
+            SELECT d.Id, f.Name, d.Weight, f.Calories, f.Protein, f.Fats, f.Carbs, d.MealType,
+                   ROUND(d.Weight * f.Calories / 100, 1) as TotalCal,
+                   ROUND(d.Weight * f.Protein / 100, 1) as TotalProt,
+                   ROUND(d.Weight * f.Fats / 100, 1) as TotalFat,
+                   ROUND(d.Weight * f.Carbs / 100, 1) as TotalCarb
+            FROM Diary d
+            JOIN Foods f ON d.FoodId = f.Id
+            WHERE d.Date = @date
+            ORDER BY d.MealType, d.Id";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@date", today);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        double totalCal = 0, totalProt = 0, totalFat = 0, totalCarb = 0;
+
+                        while (reader.Read())
+                        {
+                            ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                            item.SubItems.Add(reader["Name"].ToString());
+                            item.SubItems.Add(reader["Weight"].ToString());
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalCal"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalProt"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalFat"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalCarb"]).ToString("F1"));
+                            item.SubItems.Add(reader["MealType"].ToString());
+                            DiaryList.Items.Add(item);
+
+                            totalCal += Convert.ToDouble(reader["TotalCal"]);
+                            totalProt += Convert.ToDouble(reader["TotalProt"]);
+                            totalFat += Convert.ToDouble(reader["TotalFat"]);
+                            totalCarb += Convert.ToDouble(reader["TotalCarb"]);
+                        }
+
+                        if (DiaryList.Items.Count > 0)
+                        {
+                            ListViewItem totalItem = new ListViewItem("--- ИТОГО ЗА ДЕНЬ ---");
+                            totalItem.Font = new Font(DiaryList.Font, FontStyle.Bold);
+                            totalItem.ForeColor = System.Drawing.Color.LimeGreen;
+                            for (int i = 1; i < DiaryList.Columns.Count - 3; i++)
+                                totalItem.SubItems.Add("");
+                            totalItem.SubItems.Add(totalCal.ToString("F1"));
+                            totalItem.SubItems.Add(totalProt.ToString("F1"));
+                            totalItem.SubItems.Add(totalFat.ToString("F1"));
+                            totalItem.SubItems.Add(totalCarb.ToString("F1"));
+                            totalItem.SubItems.Add("");
+                            DiaryList.Items.Add(totalItem);
+                        }
+                    }
+                }
+            }
+            UpdateProgress();
+        }
+        private void UpdateProgress()
+        {
+            if (savedNorm == 0)
+            {
+                ProgressStatus.Text = "Сначала выполните расчёт нормы (кнопка «Рассчитать»).";
+                ProgressBar.Value = 0;
+                return;
+            }
+
+            string today = DateTime.Now.ToString("dd.MM.yyyy");
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = @"
+            SELECT SUM(ROUND(d.Weight * f.Calories / 100, 1)) as TotalCal
+            FROM Diary d
+            JOIN Foods f ON d.FoodId = f.Id
+            WHERE d.Date = @date";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@date", today);
+                    object result = cmd.ExecuteScalar();
+                    double eaten = result == DBNull.Value ? 0 : Convert.ToDouble(result);
+
+                    double norm = savedNorm;
+                    double percent = Math.Min(eaten / norm * 100, 100);
+                    int percentInt = (int)percent;
+
+                    ProgressBar.Value = percentInt;
+                    ProgressStatus.Text = $"Съедено: {eaten:F0} / {norm:F0} ккал ({percentInt}%)";
+
+                    if (percentInt < 80)
+                        ProgressStatus.ForeColor = System.Drawing.Color.Yellow;
+                    else if (percentInt <= 100)
+                        ProgressStatus.ForeColor = System.Drawing.Color.LightGreen;
+                    else
+                        ProgressStatus.ForeColor = System.Drawing.Color.OrangeRed;
+                }
+            }
+        }
+        private void AddToDiary_Click(object sender, EventArgs e)
+        {
+            if (FoodSelect.SelectedIndex == -1)
+            {
+                MessageBox.Show("Выберите продукт.");
+                return;
+            }
+
+            if (FoodWeight.Value <= 0)
+            {
+                MessageBox.Show("Введите корректный вес продукта.");
+                return;
+            }
+
+            string selectedName = FoodSelect.SelectedItem.ToString();
+            int foodId;
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = "SELECT Id FROM Foods WHERE Name = @name";
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@name", selectedName);
+                    foodId = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+            }
+            string mealType = MealTypeSelect.Text;
+            double weight = (double)FoodWeight.Value;
+            string today = DateTime.Now.ToString("dd.MM.yyyy");
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+
+                if (editingDiaryId == -1)
+                {
+                    string sql = "INSERT INTO Diary (Date, FoodId, Weight, MealType) VALUES (@date, @foodId, @weight, @meal)";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@date", today);
+                        cmd.Parameters.AddWithValue("@foodId", foodId);
+                        cmd.Parameters.AddWithValue("@weight", weight);
+                        cmd.Parameters.AddWithValue("@meal", mealType);
+                        cmd.ExecuteNonQuery();
+                    }
+                    MessageBox.Show("Продукт добавлен в дневник.");
+                }
+                else
+                {
+                    string sql = @"UPDATE Diary SET 
+                           FoodId = @foodId, 
+                           Weight = @weight, 
+                           MealType = @meal 
+                           WHERE Id = @id";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@foodId", foodId);
+                        cmd.Parameters.AddWithValue("@weight", weight);
+                        cmd.Parameters.AddWithValue("@meal", mealType);
+                        cmd.Parameters.AddWithValue("@id", editingDiaryId);
+                        cmd.ExecuteNonQuery();
+                    }
+                    MessageBox.Show("Запись обновлена.");
+                    editingDiaryId = -1; 
+                }
+            }
+
+            LoadDiary();
+        }
+        private void RemoveFromDiary_Click(object sender, EventArgs e)
+        {
+            if (DiaryList.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для удаления.");
+                return;
+            }
+
+            ListViewItem selected = DiaryList.SelectedItems[0];
+            if (selected.Text.Contains("---") || selected.Text == "")
+            {
+                MessageBox.Show("Нельзя удалить заголовок или итоговую строку.");
+                return;
+            }
+
+            int id = Convert.ToInt32(selected.Text);
+            DialogResult result = MessageBox.Show("Удалить запись из дневника?", "Подтверждение",
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+                {
+                    conn.Open();
+                    string sql = "DELETE FROM Diary WHERE Id = @id";
+                    using (var cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                LoadDiary();
             }
         }
         private double GetCalories()
@@ -117,6 +424,7 @@ namespace CaloriesAndPFC
             double proteinPercent = (bzhu.protein * 4 / calories) * 100;
             double fatsPercent = (bzhu.fats * 9 / calories) * 100;
             double carbsPercent = (bzhu.carbs * 4 / calories) * 100;
+            savedNorm = calories;
 
             Result.Clear();
             Result.AppendText("РЕЗУЛЬТАТ РАСЧЁТА\n\n");
@@ -530,6 +838,116 @@ namespace CaloriesAndPFC
             MessageBox.Show("Теперь вы можете изменить параметры в полях ввода. После изменений нажмите «Добавить запись» для сохранения.");
         }
 
+        private void btnEditDiary_Click(object sender, EventArgs e)
+        {
+            if (DiaryList.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для изменения.");
+                return;
+            }
+
+            ListViewItem selected = DiaryList.SelectedItems[0];
+            if (selected.Text.Contains("---") || selected.Text == "")
+            {
+                MessageBox.Show("Нельзя изменить заголовок или итоговую строку.");
+                return;
+            }
+
+            editingDiaryId = Convert.ToInt32(selected.Text);
+
+            string productName = selected.SubItems[1].Text;
+            double weight = Convert.ToDouble(selected.SubItems[2].Text);
+            string mealType = selected.SubItems[7].Text;
+
+            for (int i = 0; i < FoodSelect.Items.Count; i++)
+            {
+                if (FoodSelect.Items[i].ToString() == productName)
+                {
+                    FoodSelect.SelectedIndex = i;
+                    break;
+                }
+            }
+
+            FoodWeight.Value = (decimal)weight;
+            MealTypeSelect.Text = mealType;
+
+            MessageBox.Show("Теперь измените данные и нажмите «Добавить в дневник» для сохранения.");
+        }
+        private void btnSearchDiary_Click(object sender, EventArgs e)
+        {
+            string searchText = SearchBox.Text.Trim();
+            if (string.IsNullOrEmpty(searchText))
+            {
+                MessageBox.Show("Введите текст для поиска.");
+                return;
+            }
+
+            DiaryList.Items.Clear();
+            string today = DateTime.Now.ToString("dd.MM.yyyy");
+
+            using (var conn = new SQLiteConnection("Data Source=CalorieHistory.db;Version=3;"))
+            {
+                conn.Open();
+                string sql = @"
+            SELECT d.Id, f.Name, d.Weight, f.Calories, f.Protein, f.Fats, f.Carbs, d.MealType,
+                   ROUND(d.Weight * f.Calories / 100, 1) as TotalCal,
+                   ROUND(d.Weight * f.Protein / 100, 1) as TotalProt,
+                   ROUND(d.Weight * f.Fats / 100, 1) as TotalFat,
+                   ROUND(d.Weight * f.Carbs / 100, 1) as TotalCarb
+            FROM Diary d
+            JOIN Foods f ON d.FoodId = f.Id
+            WHERE d.Date = @date AND (f.Name LIKE @search OR d.MealType LIKE @search)
+            ORDER BY d.MealType, d.Id";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@date", today);
+                    cmd.Parameters.AddWithValue("@search", "%" + searchText + "%");
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        double totalCal = 0, totalProt = 0, totalFat = 0, totalCarb = 0;
+
+                        while (reader.Read())
+                        {
+                            ListViewItem item = new ListViewItem(reader["Id"].ToString());
+                            item.SubItems.Add(reader["Name"].ToString());
+                            item.SubItems.Add(reader["Weight"].ToString());
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalCal"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalProt"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalFat"]).ToString("F1"));
+                            item.SubItems.Add(Convert.ToDouble(reader["TotalCarb"]).ToString("F1"));
+                            item.SubItems.Add(reader["MealType"].ToString());
+                            DiaryList.Items.Add(item);
+
+                            totalCal += Convert.ToDouble(reader["TotalCal"]);
+                            totalProt += Convert.ToDouble(reader["TotalProt"]);
+                            totalFat += Convert.ToDouble(reader["TotalFat"]);
+                            totalCarb += Convert.ToDouble(reader["TotalCarb"]);
+                        }
+
+                        if (DiaryList.Items.Count > 0)
+                        {
+                            ListViewItem totalItem = new ListViewItem("--- ИТОГО ЗА ДЕНЬ (поиск) ---");
+                            totalItem.Font = new Font(DiaryList.Font, FontStyle.Bold);
+                            totalItem.ForeColor = System.Drawing.Color.LimeGreen;
+                            for (int i = 1; i < DiaryList.Columns.Count - 3; i++)
+                                totalItem.SubItems.Add("");
+                            totalItem.SubItems.Add(totalCal.ToString("F1"));
+                            totalItem.SubItems.Add(totalProt.ToString("F1"));
+                            totalItem.SubItems.Add(totalFat.ToString("F1"));
+                            totalItem.SubItems.Add(totalCarb.ToString("F1"));
+                            totalItem.SubItems.Add("");
+                            DiaryList.Items.Add(totalItem);
+                        }
+                        else
+                        {
+                            MessageBox.Show("По вашему запросу ничего не найдено.");
+                        }
+                    }
+                }
+            }
+        }
+
         private void Result_TextChanged(object sender, EventArgs e)
         {
 
@@ -556,6 +974,26 @@ namespace CaloriesAndPFC
         }
 
         private void panel3_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MealTypeSelect_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnRemoveFromDiary_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel5_Paint(object sender, PaintEventArgs e)
         {
 
         }

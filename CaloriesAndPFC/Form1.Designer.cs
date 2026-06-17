@@ -60,11 +60,34 @@
             this.SortByCalories = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.Filter = new System.Windows.Forms.Button();
+            this.FilterGoal = new System.Windows.Forms.ComboBox();
             this.panel3 = new System.Windows.Forms.Panel();
             this.panel4 = new System.Windows.Forms.Panel();
             this.Edit = new System.Windows.Forms.Button();
-            this.FilterGoal = new System.Windows.Forms.ComboBox();
-            this.Filter = new System.Windows.Forms.Button();
+            this.labelFoodSelect = new System.Windows.Forms.Label();
+            this.FoodSelect = new System.Windows.Forms.ComboBox();
+            this.labelFoodWeight = new System.Windows.Forms.Label();
+            this.labelMealType = new System.Windows.Forms.Label();
+            this.ProgressStatus = new System.Windows.Forms.Label();
+            this.FoodWeight = new System.Windows.Forms.NumericUpDown();
+            this.MealTypeSelect = new System.Windows.Forms.ComboBox();
+            this.btnAddToDiary = new System.Windows.Forms.Button();
+            this.btnRemoveFromDiary = new System.Windows.Forms.Button();
+            this.DiaryList = new System.Windows.Forms.ListView();
+            this.ProgressBar = new System.Windows.Forms.ProgressBar();
+            this.colDiaryId = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryWeight = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryCal = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryProt = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryFat = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryCarb = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryMeal = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.colDiaryName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.panel5 = new System.Windows.Forms.Panel();
+            this.btnEditDiary = new System.Windows.Forms.Button();
+            this.SearchBox = new System.Windows.Forms.TextBox();
+            this.btnSearchDiary = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Weight)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Height)).BeginInit();
@@ -73,12 +96,15 @@
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FoodWeight)).BeginInit();
+            this.panel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // Calculate
             // 
             this.Calculate.BackColor = System.Drawing.Color.LightGreen;
             this.Calculate.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Calculate.ForeColor = System.Drawing.Color.Black;
             this.Calculate.Location = new System.Drawing.Point(7, 9);
             this.Calculate.Name = "Calculate";
             this.Calculate.Size = new System.Drawing.Size(178, 83);
@@ -91,6 +117,7 @@
             // 
             this.SaveTxt.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.SaveTxt.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.SaveTxt.ForeColor = System.Drawing.Color.Black;
             this.SaveTxt.Location = new System.Drawing.Point(393, 9);
             this.SaveTxt.Name = "SaveTxt";
             this.SaveTxt.Size = new System.Drawing.Size(178, 83);
@@ -116,6 +143,7 @@
             // 
             this.ShowHistory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.ShowHistory.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ShowHistory.ForeColor = System.Drawing.Color.Black;
             this.ShowHistory.Location = new System.Drawing.Point(583, 9);
             this.ShowHistory.Name = "ShowHistory";
             this.ShowHistory.Size = new System.Drawing.Size(178, 83);
@@ -129,7 +157,7 @@
             this.Result.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(204)))), ((int)(((byte)(204)))));
             this.Result.Location = new System.Drawing.Point(7, 400);
             this.Result.Name = "Result";
-            this.Result.Size = new System.Drawing.Size(770, 202);
+            this.Result.Size = new System.Drawing.Size(1329, 202);
             this.Result.TabIndex = 15;
             this.Result.Text = "";
             this.Result.TextChanged += new System.EventHandler(this.Result_TextChanged);
@@ -204,6 +232,7 @@
             this.Goal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Goal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.Goal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Goal.Font = new System.Drawing.Font("Consolas", 10F);
             this.Goal.ForeColor = System.Drawing.Color.White;
             this.Goal.FormattingEnabled = true;
@@ -219,6 +248,8 @@
             this.Activity.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Activity.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.Activity.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Activity.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Activity.Font = new System.Drawing.Font("Consolas", 10F);
             this.Activity.ForeColor = System.Drawing.Color.White;
             this.Activity.FormattingEnabled = true;
@@ -226,7 +257,6 @@
             this.Activity.Name = "Activity";
             this.Activity.Size = new System.Drawing.Size(391, 23);
             this.Activity.TabIndex = 9;
-            this.Activity.Text = "Минимальная, Низкая, Средняя, Высокая, Экстремальная";
             // 
             // Weight
             // 
@@ -284,6 +314,8 @@
             this.Gender.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.Gender.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.Gender.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.Gender.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.Gender.Font = new System.Drawing.Font("Consolas", 10F);
             this.Gender.ForeColor = System.Drawing.Color.White;
             this.Gender.FormattingEnabled = true;
@@ -291,7 +323,6 @@
             this.Gender.Name = "Gender";
             this.Gender.Size = new System.Drawing.Size(141, 23);
             this.Gender.TabIndex = 1;
-            this.Gender.Text = "Мужской, Женский";
             this.Gender.SelectedIndexChanged += new System.EventHandler(this.Gender_SelectedIndexChanged);
             // 
             // label7
@@ -432,7 +463,7 @@
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Location = new System.Drawing.Point(1, 1);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(786, 42);
+            this.panel1.Size = new System.Drawing.Size(1364, 42);
             this.panel1.TabIndex = 24;
             // 
             // panel2
@@ -456,6 +487,33 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(770, 100);
             this.panel2.TabIndex = 25;
+            // 
+            // Filter
+            // 
+            this.Filter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.Filter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Filter.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Filter.ForeColor = System.Drawing.Color.White;
+            this.Filter.Location = new System.Drawing.Point(593, 69);
+            this.Filter.Name = "Filter";
+            this.Filter.Size = new System.Drawing.Size(95, 24);
+            this.Filter.TabIndex = 28;
+            this.Filter.Text = "Фильтровать";
+            this.Filter.UseVisualStyleBackColor = false;
+            this.Filter.Click += new System.EventHandler(this.Filter_Click);
+            // 
+            // FilterGoal
+            // 
+            this.FilterGoal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.FilterGoal.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.FilterGoal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.FilterGoal.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FilterGoal.ForeColor = System.Drawing.Color.White;
+            this.FilterGoal.FormattingEnabled = true;
+            this.FilterGoal.Location = new System.Drawing.Point(466, 70);
+            this.FilterGoal.Name = "FilterGoal";
+            this.FilterGoal.Size = new System.Drawing.Size(121, 23);
+            this.FilterGoal.TabIndex = 16;
             // 
             // panel3
             // 
@@ -498,48 +556,263 @@
             this.Edit.UseVisualStyleBackColor = false;
             this.Edit.Click += new System.EventHandler(this.Edit_Click);
             // 
-            // FilterGoal
+            // labelFoodSelect
             // 
-            this.FilterGoal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.FilterGoal.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.FilterGoal.ForeColor = System.Drawing.Color.White;
-            this.FilterGoal.FormattingEnabled = true;
-            this.FilterGoal.Location = new System.Drawing.Point(466, 70);
-            this.FilterGoal.Name = "FilterGoal";
-            this.FilterGoal.Size = new System.Drawing.Size(121, 23);
-            this.FilterGoal.TabIndex = 16;
-            this.FilterGoal.Text = "Выбор фильтра";
+            this.labelFoodSelect.AutoSize = true;
+            this.labelFoodSelect.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelFoodSelect.ForeColor = System.Drawing.Color.White;
+            this.labelFoodSelect.Location = new System.Drawing.Point(24, 12);
+            this.labelFoodSelect.Name = "labelFoodSelect";
+            this.labelFoodSelect.Size = new System.Drawing.Size(63, 15);
+            this.labelFoodSelect.TabIndex = 28;
+            this.labelFoodSelect.Text = "Продукт:";
             // 
-            // Filter
+            // FoodSelect
             // 
-            this.Filter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.Filter.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.Filter.ForeColor = System.Drawing.Color.White;
-            this.Filter.Location = new System.Drawing.Point(593, 69);
-            this.Filter.Name = "Filter";
-            this.Filter.Size = new System.Drawing.Size(95, 24);
-            this.Filter.TabIndex = 28;
-            this.Filter.Text = "Фильтровать";
-            this.Filter.UseVisualStyleBackColor = false;
-            this.Filter.Click += new System.EventHandler(this.Filter_Click);
+            this.FoodSelect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.FoodSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.FoodSelect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.FoodSelect.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FoodSelect.ForeColor = System.Drawing.Color.White;
+            this.FoodSelect.FormattingEnabled = true;
+            this.FoodSelect.Location = new System.Drawing.Point(93, 10);
+            this.FoodSelect.Name = "FoodSelect";
+            this.FoodSelect.Size = new System.Drawing.Size(168, 23);
+            this.FoodSelect.TabIndex = 29;
+            // 
+            // labelFoodWeight
+            // 
+            this.labelFoodWeight.AutoSize = true;
+            this.labelFoodWeight.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelFoodWeight.ForeColor = System.Drawing.Color.White;
+            this.labelFoodWeight.Location = new System.Drawing.Point(24, 38);
+            this.labelFoodWeight.Name = "labelFoodWeight";
+            this.labelFoodWeight.Size = new System.Drawing.Size(63, 15);
+            this.labelFoodWeight.TabIndex = 30;
+            this.labelFoodWeight.Text = "Вес (г):";
+            // 
+            // labelMealType
+            // 
+            this.labelMealType.AutoSize = true;
+            this.labelMealType.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelMealType.ForeColor = System.Drawing.Color.White;
+            this.labelMealType.Location = new System.Drawing.Point(3, 65);
+            this.labelMealType.Name = "labelMealType";
+            this.labelMealType.Size = new System.Drawing.Size(84, 15);
+            this.labelMealType.TabIndex = 31;
+            this.labelMealType.Text = "Приём пищи:";
+            this.labelMealType.Click += new System.EventHandler(this.label9_Click);
+            // 
+            // ProgressStatus
+            // 
+            this.ProgressStatus.AutoSize = true;
+            this.ProgressStatus.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.ProgressStatus.ForeColor = System.Drawing.Color.White;
+            this.ProgressStatus.Location = new System.Drawing.Point(3, 133);
+            this.ProgressStatus.Name = "ProgressStatus";
+            this.ProgressStatus.Size = new System.Drawing.Size(49, 15);
+            this.ProgressStatus.TabIndex = 32;
+            this.ProgressStatus.Text = "Status";
+            // 
+            // FoodWeight
+            // 
+            this.FoodWeight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.FoodWeight.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.FoodWeight.ForeColor = System.Drawing.Color.White;
+            this.FoodWeight.Location = new System.Drawing.Point(93, 37);
+            this.FoodWeight.Name = "FoodWeight";
+            this.FoodWeight.Size = new System.Drawing.Size(168, 23);
+            this.FoodWeight.TabIndex = 33;
+            this.FoodWeight.Value = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            // 
+            // MealTypeSelect
+            // 
+            this.MealTypeSelect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.MealTypeSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.MealTypeSelect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.MealTypeSelect.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.MealTypeSelect.ForeColor = System.Drawing.Color.White;
+            this.MealTypeSelect.FormattingEnabled = true;
+            this.MealTypeSelect.Location = new System.Drawing.Point(93, 63);
+            this.MealTypeSelect.Name = "MealTypeSelect";
+            this.MealTypeSelect.Size = new System.Drawing.Size(168, 23);
+            this.MealTypeSelect.TabIndex = 34;
+            this.MealTypeSelect.SelectedIndexChanged += new System.EventHandler(this.MealTypeSelect_SelectedIndexChanged);
+            // 
+            // btnAddToDiary
+            // 
+            this.btnAddToDiary.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnAddToDiary.Location = new System.Drawing.Point(381, 79);
+            this.btnAddToDiary.Name = "btnAddToDiary";
+            this.btnAddToDiary.Size = new System.Drawing.Size(162, 56);
+            this.btnAddToDiary.TabIndex = 35;
+            this.btnAddToDiary.Text = "Добавить в дневник";
+            this.btnAddToDiary.UseVisualStyleBackColor = true;
+            // 
+            // btnRemoveFromDiary
+            // 
+            this.btnRemoveFromDiary.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnRemoveFromDiary.Location = new System.Drawing.Point(381, 12);
+            this.btnRemoveFromDiary.Name = "btnRemoveFromDiary";
+            this.btnRemoveFromDiary.Size = new System.Drawing.Size(162, 56);
+            this.btnRemoveFromDiary.TabIndex = 36;
+            this.btnRemoveFromDiary.Text = "Удалить из дневника";
+            this.btnRemoveFromDiary.UseVisualStyleBackColor = true;
+            this.btnRemoveFromDiary.Click += new System.EventHandler(this.btnRemoveFromDiary_Click);
+            // 
+            // DiaryList
+            // 
+            this.DiaryList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(204)))), ((int)(((byte)(204)))), ((int)(((byte)(204)))));
+            this.DiaryList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.colDiaryId,
+            this.colDiaryName,
+            this.colDiaryWeight,
+            this.colDiaryCal,
+            this.colDiaryProt,
+            this.colDiaryFat,
+            this.colDiaryCarb,
+            this.colDiaryMeal});
+            this.DiaryList.FullRowSelect = true;
+            this.DiaryList.GridLines = true;
+            this.DiaryList.HideSelection = false;
+            this.DiaryList.Location = new System.Drawing.Point(783, 261);
+            this.DiaryList.MultiSelect = false;
+            this.DiaryList.Name = "DiaryList";
+            this.DiaryList.ShowGroups = false;
+            this.DiaryList.Size = new System.Drawing.Size(553, 133);
+            this.DiaryList.TabIndex = 37;
+            this.DiaryList.UseCompatibleStateImageBehavior = false;
+            this.DiaryList.View = System.Windows.Forms.View.Details;
+            // 
+            // ProgressBar
+            // 
+            this.ProgressBar.Location = new System.Drawing.Point(3, 151);
+            this.ProgressBar.Name = "ProgressBar";
+            this.ProgressBar.Size = new System.Drawing.Size(372, 52);
+            this.ProgressBar.TabIndex = 38;
+            // 
+            // colDiaryId
+            // 
+            this.colDiaryId.Text = "ID";
+            this.colDiaryId.Width = 0;
+            // 
+            // colDiaryWeight
+            // 
+            this.colDiaryWeight.DisplayIndex = 1;
+            this.colDiaryWeight.Text = "Вес (г)";
+            this.colDiaryWeight.Width = 70;
+            // 
+            // colDiaryCal
+            // 
+            this.colDiaryCal.DisplayIndex = 2;
+            this.colDiaryCal.Text = "Ккал";
+            this.colDiaryCal.Width = 70;
+            // 
+            // colDiaryProt
+            // 
+            this.colDiaryProt.DisplayIndex = 3;
+            this.colDiaryProt.Text = "Белки";
+            this.colDiaryProt.Width = 70;
+            // 
+            // colDiaryFat
+            // 
+            this.colDiaryFat.DisplayIndex = 4;
+            this.colDiaryFat.Text = "Жиры";
+            this.colDiaryFat.Width = 70;
+            // 
+            // colDiaryCarb
+            // 
+            this.colDiaryCarb.DisplayIndex = 5;
+            this.colDiaryCarb.Text = "Углеводы";
+            this.colDiaryCarb.Width = 70;
+            // 
+            // colDiaryMeal
+            // 
+            this.colDiaryMeal.DisplayIndex = 6;
+            this.colDiaryMeal.Text = "Приём";
+            this.colDiaryMeal.Width = 80;
+            // 
+            // colDiaryName
+            // 
+            this.colDiaryName.DisplayIndex = 7;
+            this.colDiaryName.Text = "Продукт";
+            this.colDiaryName.Width = 120;
+            // 
+            // panel5
+            // 
+            this.panel5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(37)))), ((int)(((byte)(38)))));
+            this.panel5.Controls.Add(this.btnSearchDiary);
+            this.panel5.Controls.Add(this.SearchBox);
+            this.panel5.Controls.Add(this.btnEditDiary);
+            this.panel5.Controls.Add(this.ProgressBar);
+            this.panel5.Controls.Add(this.FoodSelect);
+            this.panel5.Controls.Add(this.FoodWeight);
+            this.panel5.Controls.Add(this.MealTypeSelect);
+            this.panel5.Controls.Add(this.ProgressStatus);
+            this.panel5.Controls.Add(this.btnRemoveFromDiary);
+            this.panel5.Controls.Add(this.labelFoodSelect);
+            this.panel5.Controls.Add(this.btnAddToDiary);
+            this.panel5.Controls.Add(this.labelFoodWeight);
+            this.panel5.Controls.Add(this.labelMealType);
+            this.panel5.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.panel5.Location = new System.Drawing.Point(783, 49);
+            this.panel5.Name = "panel5";
+            this.panel5.Size = new System.Drawing.Size(553, 206);
+            this.panel5.TabIndex = 39;
+            this.panel5.Paint += new System.Windows.Forms.PaintEventHandler(this.panel5_Paint);
+            // 
+            // btnEditDiary
+            // 
+            this.btnEditDiary.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnEditDiary.Location = new System.Drawing.Point(381, 148);
+            this.btnEditDiary.Name = "btnEditDiary";
+            this.btnEditDiary.Size = new System.Drawing.Size(162, 56);
+            this.btnEditDiary.TabIndex = 37;
+            this.btnEditDiary.Text = "Редактировать запись";
+            this.btnEditDiary.UseVisualStyleBackColor = true;
+            this.btnEditDiary.Click += new System.EventHandler(this.btnEditDiary_Click);
+            // 
+            // SearchBox
+            // 
+            this.SearchBox.Location = new System.Drawing.Point(93, 106);
+            this.SearchBox.Name = "SearchBox";
+            this.SearchBox.Size = new System.Drawing.Size(87, 23);
+            this.SearchBox.TabIndex = 39;
+            // 
+            // btnSearchDiary
+            // 
+            this.btnSearchDiary.Location = new System.Drawing.Point(186, 105);
+            this.btnSearchDiary.Name = "btnSearchDiary";
+            this.btnSearchDiary.Size = new System.Drawing.Size(75, 23);
+            this.btnSearchDiary.TabIndex = 40;
+            this.btnSearchDiary.Text = "найти";
+            this.btnSearchDiary.UseVisualStyleBackColor = true;
+            this.btnSearchDiary.Click += new System.EventHandler(this.btnSearchDiary_Click);
             // 
             // Calories
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.ClientSize = new System.Drawing.Size(784, 606);
+            this.ClientSize = new System.Drawing.Size(1339, 606);
+            this.Controls.Add(this.panel5);
+            this.Controls.Add(this.DiaryList);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.Records);
             this.Controls.Add(this.Result);
+            this.ForeColor = System.Drawing.Color.Black;
             this.MinimumSize = new System.Drawing.Size(750, 550);
             this.Name = "Calories";
-            this.Padding = new System.Windows.Forms.Padding(10);
+            this.Padding = new System.Windows.Forms.Padding(10, 10, 10, 10);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Calories";
+            this.Text = "y";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Weight)).EndInit();
@@ -551,6 +824,9 @@
             this.panel2.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.FoodWeight)).EndInit();
+            this.panel5.ResumeLayout(false);
+            this.panel5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -593,6 +869,29 @@
         private System.Windows.Forms.Button Edit;
         private System.Windows.Forms.ComboBox FilterGoal;
         private System.Windows.Forms.Button Filter;
+        private System.Windows.Forms.Label labelFoodSelect;
+        private System.Windows.Forms.ComboBox FoodSelect;
+        private System.Windows.Forms.Label labelFoodWeight;
+        private System.Windows.Forms.Label labelMealType;
+        private System.Windows.Forms.Label ProgressStatus;
+        private System.Windows.Forms.NumericUpDown FoodWeight;
+        private System.Windows.Forms.ComboBox MealTypeSelect;
+        private System.Windows.Forms.Button btnAddToDiary;
+        private System.Windows.Forms.Button btnRemoveFromDiary;
+        private System.Windows.Forms.ListView DiaryList;
+        private System.Windows.Forms.ProgressBar ProgressBar;
+        private System.Windows.Forms.ColumnHeader colDiaryId;
+        private System.Windows.Forms.ColumnHeader colDiaryName;
+        private System.Windows.Forms.ColumnHeader colDiaryWeight;
+        private System.Windows.Forms.ColumnHeader colDiaryCal;
+        private System.Windows.Forms.ColumnHeader colDiaryProt;
+        private System.Windows.Forms.ColumnHeader colDiaryFat;
+        private System.Windows.Forms.ColumnHeader colDiaryCarb;
+        private System.Windows.Forms.ColumnHeader colDiaryMeal;
+        private System.Windows.Forms.Panel panel5;
+        private System.Windows.Forms.Button btnEditDiary;
+        private System.Windows.Forms.Button btnSearchDiary;
+        private System.Windows.Forms.TextBox SearchBox;
     }
 }
 
